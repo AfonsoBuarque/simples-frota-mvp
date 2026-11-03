@@ -255,3 +255,18 @@ html.alto-contraste .assinatura { background: #fff; border-color: #ffde00; }
 html.alto-contraste .etapa-marcador { border-color: #fff; }
 html.alto-contraste .etapa-concluida .etapa-marcador, html.alto-contraste .etapa-atual .etapa-marcador { background: #ffde00; border-color: #ffde00; color: #000; }
 html.alto-contraste .rodape { color: #fff; }
+
+/* Ocorrência ("Não consegui entregar") */
+.selo-icone { font-weight: 800; }
+.selo-ocorrencia { background: #ffe3c2; color: #6b2e00; border-color: #e0a060; }
+html.alto-contraste .selo-ocorrencia { color: #ffde00; border-color: #ffde00; }
+.motivo-ocorrencia { display: block; margin-top: .35rem; font-size: .9rem; color: var(--texto-suave); }
+.botao-alerta { background: #8a3a00; color: #fff; }
+.botao-alerta:hover { background: #6b2e00; }
+html.alto-contraste .botao-alerta { background: #ffde00; color: #000; }
+.grupo-opcoes { border: 0; padding: 0; margin: 0 0 1.25rem; }
+.opcao { display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: .5rem .75rem; margin-bottom: .5rem; border: 2px solid var(--borda); border-radius: 10px; font-weight: 600; cursor: pointer; background: var(--superficie); }
+.opcao input { width: 1.4rem; height: 1.4rem; accent-color: var(--primaria); flex-shrink: 0; }
+.opcao:has(input:checked) { border-color: var(--primaria); box-shadow: inset 0 0 0 1px var(--primaria); }
+.acao-alternativa { margin-top: 1rem; text-align: center; }
+.acao-alternativa a { display: inline-block; padding: .6rem .25rem; font-weight: 700; }

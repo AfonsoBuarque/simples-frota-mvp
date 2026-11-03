@@ -12,6 +12,7 @@
   <li class="indicador"><span class="indicador-valor">{{ contagem.pendentes }}</span> Pendentes</li>
   <li class="indicador"><span class="indicador-valor">{{ contagem.em_rota }}</span> Em rota</li>
   <li class="indicador"><span class="indicador-valor">{{ contagem.entregues }}</span> Entregues</li>
+  <li class="indicador{% if contagem.ocorrencias %} indicador-alerta{% endif %}"><span class="indicador-valor">{{ contagem.ocorrencias }}</span> Ocorrências</li>
   <li class="indicador{% if contagem.atrasadas %} indicador-alerta{% endif %}"><span class="indicador-valor">{{ contagem.atrasadas }}</span> Atrasadas</li>
 </ul>
 
@@ -44,7 +45,8 @@
       </th>
       <td data-rotulo="Motorista">{% if entrega.motorista %}{{ entrega.motorista.get_full_name|default:entrega.motorista.username }}{% else %}<em>Sem motorista</em>{% endif %}</td>
       <td data-rotulo="Prazo">{% if entrega.prazo %}<time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m H:i" }}</time>{% else %}—{% endif %}</td>
-      <td data-rotulo="Status"><div class="selos">{% include "entregas/_status.html" %}</div></td>
+      <td data-rotulo="Status"><div class="selos">{% include "entregas/_status.html" %}</div>
+        {% if entrega.status == "ocorrencia" %}<span class="motivo-ocorrencia">{{ entrega.get_motivo_ocorrencia_display }}{% if entrega.detalhe_ocorrencia %}: {{ entrega.detalhe_ocorrencia }}{% endif %}</span>{% endif %}</td>
       <td data-rotulo="Comprovante">{% if entrega.status == "entregue" and entrega.comprovante %}{{ entrega.comprovante.registrado_em|date:"d/m H:i" }}{% else %}—{% endif %}</td>
     </tr>
     {% endfor %}

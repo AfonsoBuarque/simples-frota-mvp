@@ -1,0 +1,31 @@
+{% extends "entregas/base.html" %}
+{% block titulo %}Não consegui entregar{% endblock %}
+{% block conteudo %}
+<p><a class="link-voltar" href="{% url 'entregas:minhas_entregas' %}">← Voltar para minhas entregas</a></p>
+<h1>Não consegui entregar</h1>
+<p class="resumo">{{ entrega.cliente }} · {{ entrega.endereco }}</p>
+
+<form method="post" class="cartao" novalidate>
+  {% csrf_token %}
+  {% if form.errors %}
+  <p class="alerta alerta-error" role="alert">Confira os campos destacados abaixo.</p>
+  {% endif %}
+
+  <fieldset class="campo grupo-opcoes{% if form.motivo.errors %} campo-com-erro{% endif %}">
+    <legend class="rotulo">{{ form.motivo.label }}</legend>
+    {% for opcao in form.motivo %}
+    <label class="opcao" for="{{ opcao.id_for_label }}">{{ opcao.tag }} <span>{{ opcao.choice_label }}</span></label>
+    {% endfor %}
+    {% for erro in form.motivo.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
+  </fieldset>
+
+  <div class="campo{% if form.detalhe.errors %} campo-com-erro{% endif %}">
+    <label for="{{ form.detalhe.id_for_label }}">{{ form.detalhe.label }}</label>
+    <p class="ajuda" id="id_detalhe_ajuda">{{ form.detalhe.help_text }}</p>
+    {{ form.detalhe }}
+    {% for erro in form.detalhe.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
+  </div>
+
+  <button type="submit" class="botao botao-alerta botao-grande botao-bloco">Registrar ocorrência</button>
+</form>
+{% endblock %}
