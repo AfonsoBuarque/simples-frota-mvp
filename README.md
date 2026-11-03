@@ -52,7 +52,7 @@ Três entidades principais: `Usuario`, `Entrega` e `Comprovante`.
 
 ## Como executar localmente
 
-Pré-requisitos: Python 3.12, PostgreSQL 16 e Git.
+Pré-requisitos: Python 3.12 e Git. O PostgreSQL 16 é opcional no desenvolvimento: sem `DB_NAME` no `.env`, o projeto usa SQLite.
 
 ```bash
 git clone https://github.com/AfonsoBuarque/simples-frota-mvp.git
@@ -64,17 +64,26 @@ python -m venv .venv
 # Linux/macOS
 # source .venv/bin/activate
 
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-Configure as variáveis de ambiente do banco (modelo em `.env.example`) e rode:
+Copie `.env.example` para `.env`. Para usar SQLite, apague ou comente a linha `DB_NAME`. Depois rode:
 
 ```bash
 python manage.py migrate
+python manage.py popular_demo
 python manage.py runserver
 ```
 
-> As instruções serão atualizadas conforme o código for adicionado ao repositório.
+Acesse http://127.0.0.1:8000. O comando `popular_demo` (só funciona com `DJANGO_DEBUG=True`) cria entregas de exemplo e os usuários abaixo, todos com a senha `demo12345`:
+
+| Usuário | Perfil |
+|---------|--------|
+| `gerente` | Gerente |
+| `carlos` | Motorista |
+| `marina` | Motorista |
+
+Use `python manage.py popular_demo --reset` para recriar as entregas.
 
 ## Testes
 
