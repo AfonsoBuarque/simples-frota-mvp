@@ -1,4 +1,5 @@
 import base64
+import os
 from datetime import timedelta
 
 from django.conf import settings
@@ -25,10 +26,22 @@ class Command(BaseCommand):
         parser.add_argument(
             "--reset", action="store_true", help="Apaga as entregas antes de recriar."
         )
+        parser.add_argument(
+            "--producao",
+            action="store_true",
+            help="Permite rodar com DEBUG=False usando a senha da variável DEMO_SENHA.",
+        )
 
     def handle(self, *args, **options):
+        self.senha = SENHA_DEMO
         if not settings.DEBUG:
-            raise CommandError("Este comando só roda com DJANGO_DEBUG=True.")
+            senha = os.environ.get("DEMO_SENHA", "")
+            if not options["producao"]:
+                raise CommandError("Este comando só roda com DJANGO_DEBUG=True ou com --producao.")
+            if len(senha) < 10:
+                raise CommandError("Defina DEMO_SENHA com pelo menos 10 caracteres.")
+            # Em produção nunca usa a senha conhecida do repositório.
+            self.senha = senha
 
         if options["reset"]:
             Entrega.objects.all().delete()
@@ -65,8 +78,9 @@ class Command(BaseCommand):
                     )
             self.stdout.write(self.style.SUCCESS("Entregas de exemplo criadas."))
 
+        origem = "da variável DEMO_SENHA" if self.senha != SENHA_DEMO else SENHA_DEMO
         self.stdout.write(
-            f"Usuários de exemplo (senha {SENHA_DEMO}): "
+            f"Usuários de exemplo (senha {origem}): "
             f"{gerente.username}, {carlos.username}, {marina.username}"
         )
 
@@ -76,6 +90,6 @@ class Command(BaseCommand):
             defaults={"first_name": nome, "last_name": sobrenome, "perfil": perfil},
         )
         if criado:
-            usuario.set_password(SENHA_DEMO)
+            usuario.set_password(self.senha)
             usuario.save()
         return usuario
