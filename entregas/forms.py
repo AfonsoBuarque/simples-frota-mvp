@@ -16,7 +16,12 @@ class ComprovanteForm(forms.ModelForm):
         labels = {"foto": "Foto do comprovante", "assinatura": "Assinatura"}
         widgets = {
             "foto": forms.ClearableFileInput(
-                attrs={"accept": "image/*", "capture": "environment"}
+                attrs={
+                    "accept": "image/*",
+                    "capture": "environment",
+                    "class": "entrada-arquivo",
+                    "aria-describedby": "ajuda-foto nome-foto",
+                }
             ),
             "assinatura": forms.HiddenInput(),
         }

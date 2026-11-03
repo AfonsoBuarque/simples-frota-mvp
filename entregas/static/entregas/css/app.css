@@ -202,3 +202,9 @@ textarea { min-height: 6rem; }
 .etapa-concluida, .etapa-atual { color: var(--texto); font-weight: 700; }
 .etapa-concluida .etapa-marcador { background: #0b4f1c; border-color: #0b4f1c; color: #fff; }
 .etapa-atual .etapa-marcador { background: var(--primaria); border-color: var(--primaria); color: #fff; }
+
+/* Campo de foto: o input nativo fica oculto (mas acessível) e o rótulo vira o botão */
+.seletor-arquivo { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.entrada-arquivo { position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
+.entrada-arquivo:focus-visible + label { outline: 3px solid var(--foco); outline-offset: 2px; box-shadow: 0 0 0 5px var(--texto); }
+.nome-arquivo { color: var(--texto-suave); }

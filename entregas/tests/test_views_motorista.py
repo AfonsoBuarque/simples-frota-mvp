@@ -113,6 +113,9 @@ class ComprovanteTests(BaseViewTest):
         r = self.client.get(self.url)
         self.assertContains(r, "Foto do comprovante")
         self.assertContains(r, "Assinatura na tela")
+        # Botão de foto em português, ligado ao campo de arquivo
+        self.assertContains(r, '<label for="id_foto" class="botao botao-secundario">Tirar ou escolher foto</label>', html=True)
+        self.assertContains(r, 'aria-describedby="ajuda-foto nome-foto"')
 
     def test_pendente_redireciona(self):
         self.entrega.status = Entrega.Status.PENDENTE
