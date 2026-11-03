@@ -47,7 +47,7 @@
       <td data-rotulo="Prazo">{% if entrega.prazo %}<time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m H:i" }}</time>{% else %}—{% endif %}</td>
       <td data-rotulo="Status"><div class="selos">{% include "entregas/_status.html" %}</div>
         {% if entrega.status == "ocorrencia" %}<span class="motivo-ocorrencia">{{ entrega.get_motivo_ocorrencia_display }}{% if entrega.detalhe_ocorrencia %}: {{ entrega.detalhe_ocorrencia }}{% endif %}</span>{% endif %}</td>
-      <td data-rotulo="Comprovante">{% if entrega.status == "entregue" and entrega.comprovante %}{{ entrega.comprovante.registrado_em|date:"d/m H:i" }}{% else %}—{% endif %}</td>
+      <td data-rotulo="Comprovante">{% if entrega.status == "entregue" and entrega.comprovante %}<a href="{% url 'entregas:ver_comprovante' entrega.pk %}" aria-label="Ver comprovante de {{ entrega.cliente }}">{{ entrega.comprovante.registrado_em|date:"d/m H:i" }}</a>{% else %}—{% endif %}</td>
     </tr>
     {% endfor %}
   </tbody>
