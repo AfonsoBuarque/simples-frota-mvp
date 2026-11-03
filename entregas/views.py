@@ -1,10 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Count, Q
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import ComprovanteForm
+from .forms import ComprovanteForm, EntregaForm
 from .models import Entrega, Usuario
 from .permissions import perfil_requerido
 
@@ -13,8 +15,7 @@ from .permissions import perfil_requerido
 def inicio(request):
     """Leva cada perfil para a sua tela inicial."""
     if request.user.eh_gerente:
-        # O painel do gerente entra na próxima PR.
-        return redirect("admin:index")
+        return redirect("entregas:painel")
     return redirect("entregas:minhas_entregas")
 
 
@@ -71,3 +72,60 @@ def registrar_comprovante(request, pk):
     return render(
         request, "entregas/registrar_comprovante.html", {"entrega": entrega, "form": form}
     )
+
+
+FILTROS_PAINEL = {
+    "todas": "Todas",
+    "atrasadas": "Atrasadas",
+    Entrega.Status.PENDENTE: "Pendentes",
+    Entrega.Status.EM_ROTA: "Em rota",
+    Entrega.Status.ENTREGUE: "Entregues",
+}
+
+
+@perfil_requerido(Usuario.Perfil.GERENTE)
+def painel(request):
+    agora = timezone.now()
+    filtro_atraso = Q(prazo__lt=agora) & ~Q(status=Entrega.Status.ENTREGUE)
+    todas = Entrega.objects.select_related("motorista", "comprovante")
+
+    contagem = todas.aggregate(
+        total=Count("id"),
+        pendentes=Count("id", filter=Q(status=Entrega.Status.PENDENTE)),
+        em_rota=Count("id", filter=Q(status=Entrega.Status.EM_ROTA)),
+        entregues=Count("id", filter=Q(status=Entrega.Status.ENTREGUE)),
+        atrasadas=Count("id", filter=filtro_atraso),
+    )
+
+    filtro = request.GET.get("status", "todas")
+    if filtro not in FILTROS_PAINEL:
+        filtro = "todas"
+    entregas = todas
+    if filtro == "atrasadas":
+        entregas = todas.filter(filtro_atraso)
+    elif filtro != "todas":
+        entregas = todas.filter(status=filtro)
+
+    return render(
+        request,
+        "entregas/painel.html",
+        {
+            "entregas": entregas,
+            "contagem": contagem,
+            "filtros": FILTROS_PAINEL,
+            "filtro": filtro,
+        },
+    )
+
+
+@perfil_requerido(Usuario.Perfil.GERENTE)
+def nova_entrega(request):
+    if request.method == "POST":
+        form = EntregaForm(request.POST)
+        if form.is_valid():
+            entrega = form.save()
+            messages.success(request, f"Entrega para {entrega.cliente} cadastrada.")
+            return redirect("entregas:painel")
+    else:
+        form = EntregaForm()
+    return render(request, "entregas/nova_entrega.html", {"form": form})
