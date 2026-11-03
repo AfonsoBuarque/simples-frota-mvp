@@ -1,0 +1,2 @@
+<a href="{% url 'entregas:painel' %}"{% if request.resolver_match.url_name == "painel" %} aria-current="page"{% endif %}>Painel</a>
+<a href="{% url 'entregas:nova_entrega' %}"{% if request.resolver_match.url_name == "nova_entrega" %} aria-current="page"{% endif %}>Nova entrega</a>

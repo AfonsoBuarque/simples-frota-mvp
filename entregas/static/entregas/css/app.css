@@ -160,3 +160,35 @@ textarea { min-height: 6rem; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* Painel do gerente */
+.visualmente-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.topo-nav a[aria-current="page"] { font-weight: 700; text-decoration-thickness: 3px; }
+.cabecalho-pagina { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.cabecalho-pagina h1 { margin: 0; }
+.indicadores { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: .75rem; }
+.indicador { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: .75rem 1rem; color: var(--texto-suave); font-weight: 600; }
+.indicador-valor { display: block; font-size: 1.8rem; font-weight: 800; color: var(--texto); line-height: 1.1; }
+.indicador-alerta { border-left: 6px solid var(--perigo); }
+.indicador-alerta .indicador-valor { color: var(--perigo); }
+.filtros { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.filtro { display: inline-flex; align-items: center; min-height: 44px; padding: .4rem 1rem; border: 2px solid var(--texto); border-radius: 999px; color: var(--texto); background: var(--superficie); text-decoration: none; font-weight: 600; }
+.filtro[aria-current="page"] { background: var(--texto); color: #fff; }
+.tabela { width: 100%; border-collapse: collapse; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+.tabela th, .tabela td { text-align: left; padding: .75rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
+.tabela thead th { background: #e9edf1; font-size: .9rem; }
+.tabela tbody th { font-weight: 700; }
+.endereco-tabela { display: block; font-weight: 400; color: var(--texto-suave); font-size: .9rem; }
+.linha-atrasada { background: #fff6f5; }
+.linha-atrasada th { box-shadow: inset 6px 0 0 var(--perigo); }
+.cartao-formulario { max-width: 40rem; }
+.obrigatorio { font-weight: 400; color: var(--texto-suave); font-size: .9rem; }
+.campo-com-erro input, .campo-com-erro select, .campo-com-erro textarea { border-color: var(--perigo); }
+
+@media (max-width: 40rem) {
+  .tabela thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tabela, .tabela tbody, .tabela tr, .tabela th, .tabela td { display: block; width: 100%; }
+  .tabela tr { border-bottom: 2px solid var(--borda); padding: .5rem 0; }
+  .tabela th, .tabela td { border: 0; padding: .35rem .75rem; }
+  .tabela td::before { content: attr(data-rotulo) ": "; font-weight: 700; }
+}

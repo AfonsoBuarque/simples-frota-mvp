@@ -1,0 +1,23 @@
+{% extends "entregas/base.html" %}
+{% block titulo %}Nova entrega{% endblock %}
+{% block navegacao %}{% include "entregas/_nav_gerente.html" %}{% endblock %}
+{% block conteudo %}
+<p><a class="link-voltar" href="{% url 'entregas:painel' %}">← Voltar para o painel</a></p>
+<h1>Nova entrega</h1>
+
+<form method="post" class="cartao cartao-formulario" novalidate>
+  {% csrf_token %}
+  {% if form.errors %}
+  <p class="alerta alerta-error" role="alert">Confira os campos destacados abaixo.</p>
+  {% endif %}
+  {% for campo in form %}
+  <div class="campo{% if campo.errors %} campo-com-erro{% endif %}">
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span class="obrigatorio">(obrigatório)</span>{% endif %}</label>
+    {% if campo.help_text %}<p class="ajuda" id="{{ campo.auto_id }}_ajuda">{{ campo.help_text }}</p>{% endif %}
+    {{ campo }}
+    {% for erro in campo.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
+  </div>
+  {% endfor %}
+  <button type="submit" class="botao botao-primario botao-grande botao-bloco">Cadastrar entrega</button>
+</form>
+{% endblock %}
