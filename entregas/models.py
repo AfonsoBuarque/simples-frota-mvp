@@ -33,6 +33,16 @@ class Entrega(models.Model):
         PENDENTE = "pendente", "Pendente"
         EM_ROTA = "em_rota", "Em rota"
         ENTREGUE = "entregue", "Entregue"
+        OCORRENCIA = "ocorrencia", "Ocorrência"
+
+    class MotivoOcorrencia(models.TextChoices):
+        CLIENTE_AUSENTE = "cliente_ausente", "Cliente ausente"
+        ENDERECO_ERRADO = "endereco_errado", "Endereço errado ou não encontrado"
+        RECUSADA = "recusada", "Cliente recusou a entrega"
+        OUTRO = "outro", "Outro motivo"
+
+    #: Status em que a entrega ainda está em andamento.
+    STATUS_ABERTOS = (Status.PENDENTE, Status.EM_ROTA)
 
     cliente = models.CharField(max_length=120)
     endereco = models.CharField(max_length=255)
@@ -51,6 +61,13 @@ class Entrega(models.Model):
         related_name="entregas",
         limit_choices_to={"perfil": "motorista"},
     )
+    motivo_ocorrencia = models.CharField(
+        max_length=20, choices=MotivoOcorrencia.choices, blank=True
+    )
+    detalhe_ocorrencia = models.CharField(
+        max_length=300, blank=True, help_text="Explicação do motorista."
+    )
+    ocorrencia_em = models.DateTimeField(null=True, blank=True)
     token_consulta = models.UUIDField(
         default=uuid.uuid4,
         unique=True,
@@ -70,11 +87,28 @@ class Entrega(models.Model):
 
     @property
     def atrasada(self):
-        """Uma entrega está atrasada se passou do prazo e ainda não foi entregue."""
+        """Atrasada: passou do prazo e ainda está em andamento.
+
+        Entregas concluídas ou com ocorrência registrada já têm um desfecho
+        e são tratadas à parte no painel.
+        """
         return (
             self.prazo is not None
-            and self.status != self.Status.ENTREGUE
+            and self.status in self.STATUS_ABERTOS
             and self.prazo < timezone.now()
+        )
+
+    def registrar_ocorrencia(self, motivo, detalhe=""):
+        """Encerra a tentativa de entrega com o motivo informado pelo motorista."""
+        self.status = self.Status.OCORRENCIA
+        self.motivo_ocorrencia = motivo
+        self.detalhe_ocorrencia = detalhe
+        self.ocorrencia_em = timezone.now()
+        self.save(
+            update_fields=[
+                "status", "motivo_ocorrencia", "detalhe_ocorrencia",
+                "ocorrencia_em", "atualizada_em",
+            ]
         )
 
 

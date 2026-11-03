@@ -14,7 +14,7 @@ class UsuarioAdmin(UserAdmin):
 
 @admin.register(Entrega)
 class EntregaAdmin(admin.ModelAdmin):
-    list_display = ("id", "cliente", "motorista", "status", "prazo")
+    list_display = ("id", "cliente", "motorista", "status", "motivo_ocorrencia", "prazo")
     list_filter = ("status", "motorista")
     search_fields = ("cliente", "endereco")
 
