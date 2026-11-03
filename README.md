@@ -43,6 +43,7 @@ Fora do escopo desta versão:
 
 ## Acessibilidade
 
+- Barra de acessibilidade em todas as telas: **Alto contraste** (fundo preto, texto branco, ações em amarelo) e **A− / A+** para ajustar o texto de 100% a 160%; a preferência fica salva no navegador
 - Página em `pt-BR`, link "Pular para o conteúdo" e foco visível em todos os controles
 - Botões e áreas de toque com no mínimo 44 px (48 px nos botões principais)
 - Status sempre escrito por extenso, nunca indicado só por cor
