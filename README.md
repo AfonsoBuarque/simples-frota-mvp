@@ -119,6 +119,7 @@ Variáveis de ambiente usadas em produção:
 | `DATABASE_URL` | fornecida pelo Railway |
 | `DJANGO_MEDIA_ROOT` | `/app/media` |
 | `DEMO_SENHA` | senha dos usuários de demonstração (mínimo de 10 caracteres) |
+| `DEMO_SEED` | `True` cria os usuários e as entregas de demonstração ao iniciar (idempotente); remova depois de usar |
 
 Para criar os dados de demonstração em produção: `python manage.py popular_demo --producao`. Esse comando nunca usa a senha conhecida do repositório.
 
