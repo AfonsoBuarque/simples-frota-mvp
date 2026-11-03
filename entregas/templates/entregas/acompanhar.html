@@ -1,0 +1,33 @@
+{% extends "entregas/base.html" %}
+{% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block titulo %}Acompanhar entrega{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-estreito" aria-labelledby="titulo-acompanhar">
+  <p class="resumo">Entrega para</p>
+  <h1 id="titulo-acompanhar">{{ entrega.cliente }}</h1>
+
+  <p class="status-atual">Status atual: <strong>{{ entrega.get_status_display }}</strong></p>
+
+  {% if entrega.atrasada %}
+  <p class="alerta alerta-error">Esta entrega passou do prazo previsto. A Simples Frota já foi avisada pelo painel.</p>
+  {% endif %}
+
+  <ol class="etapas" aria-label="Andamento da entrega">
+    {% for etapa in etapas %}
+    <li class="etapa{% if etapa.concluida %} etapa-concluida{% endif %}{% if etapa.atual %} etapa-atual{% endif %}"{% if etapa.atual %} aria-current="step"{% endif %}>
+      <span class="etapa-marcador" aria-hidden="true">{% if etapa.concluida or etapa.atual and entrega.status == "entregue" %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+      <span>{{ etapa.rotulo }}{% if etapa.concluida %}<span class="visualmente-oculto"> (concluída)</span>{% elif etapa.atual %}<span class="visualmente-oculto"> (etapa atual)</span>{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ol>
+
+  {% if entrega.prazo and entrega.status != "entregue" %}
+  <p>Previsão: <time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m/Y \à\s H:i" }}</time></p>
+  {% endif %}
+  {% if comprovante %}
+  <p>Entregue em <time datetime="{{ comprovante.registrado_em|date:'c' }}">{{ comprovante.registrado_em|date:"d/m/Y \à\s H:i" }}</time>, com comprovante registrado.</p>
+  {% endif %}
+
+  <p class="ajuda">Atualize a página para ver o status mais recente.</p>
+</section>
+{% endblock %}

@@ -39,6 +39,8 @@
       <th scope="row" data-rotulo="Cliente">
         {{ entrega.cliente }}
         <span class="endereco-tabela">{{ entrega.endereco }}</span>
+        <a class="link-acompanhar" href="{% url 'entregas:acompanhar' entrega.token_consulta %}"
+           aria-label="Link de acompanhamento de {{ entrega.cliente }}">Link do cliente</a>
       </th>
       <td data-rotulo="Motorista">{% if entrega.motorista %}{{ entrega.motorista.get_full_name|default:entrega.motorista.username }}{% else %}<em>Sem motorista</em>{% endif %}</td>
       <td data-rotulo="Prazo">{% if entrega.prazo %}<time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m H:i" }}</time>{% else %}—{% endif %}</td>
