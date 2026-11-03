@@ -98,6 +98,36 @@ Acesse http://127.0.0.1:8000. O comando `popular_demo` (só funciona com `DJANGO
 
 Use `python manage.py popular_demo --reset` para recriar as entregas.
 
+## Publicação (deploy) e monitoramento
+
+O MVP roda em produção no **Railway**, a partir do `Dockerfile` deste repositório:
+
+- **Aplicação:** Django servido pelo Gunicorn, com arquivos estáticos comprimidos pelo WhiteNoise
+- **Banco:** PostgreSQL gerenciado pelo Railway, ligado pela variável `DATABASE_URL`
+- **Arquivos de comprovante:** volume persistente montado em `/app/media` e servidos só a usuários autorizados
+- **HTTPS:** certificado do Railway, com redirecionamento HTTPS, cookies `Secure` e HSTS
+- **Migrações:** aplicadas automaticamente a cada deploy
+
+Variáveis de ambiente usadas em produção:
+
+| Variável | Exemplo |
+|----------|---------|
+| `DJANGO_SECRET_KEY` | chave aleatória longa |
+| `DJANGO_DEBUG` | `False` |
+| `DJANGO_ALLOWED_HOSTS` | `simples-frota.up.railway.app` |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | `https://simples-frota.up.railway.app` |
+| `DATABASE_URL` | fornecida pelo Railway |
+| `DJANGO_MEDIA_ROOT` | `/app/media` |
+| `DEMO_SENHA` | senha dos usuários de demonstração (mínimo de 10 caracteres) |
+
+Para criar os dados de demonstração em produção: `python manage.py popular_demo --producao`. Esse comando nunca usa a senha conhecida do repositório.
+
+### Monitoramento
+
+- **Health check:** `GET /saude/` responde `{"status": "ok", "banco": "ok"}` e testa a conexão com o banco (HTTP 503 se o banco cair). O Railway usa essa rota para validar cada deploy (`railway.json`).
+- **Disponibilidade:** o UptimeRobot consulta `/saude/` a cada 5 minutos e envia alerta por e-mail se o site sair do ar.
+- **Logs:** acessos do Gunicorn e eventos do sistema (`comprovante_registrado`, `ocorrencia_registrada`, erros) em linha única na saída padrão, visíveis no painel do Railway.
+
 ## Testes
 
 ```bash
