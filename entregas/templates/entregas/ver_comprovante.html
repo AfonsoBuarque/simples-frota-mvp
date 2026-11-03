@@ -1,0 +1,20 @@
+{% extends "entregas/base.html" %}
+{% block titulo %}Comprovante{% endblock %}
+{% block navegacao %}{% if user.eh_gerente %}{% include "entregas/_nav_gerente.html" %}{% endif %}{% endblock %}
+{% block conteudo %}
+<p><a class="link-voltar" href="{% if user.eh_gerente %}{% url 'entregas:painel' %}{% else %}{% url 'entregas:minhas_entregas' %}{% endif %}">← Voltar</a></p>
+<h1>Comprovante de entrega</h1>
+<section class="cartao">
+  <h2>{{ entrega.cliente }}</h2>
+  <p class="endereco">{{ entrega.endereco }}</p>
+  <p>Registrado em <time datetime="{{ comprovante.registrado_em|date:'c' }}">{{ comprovante.registrado_em|date:"d/m/Y \à\s H:i" }}</time>{% if entrega.motorista %} por {{ entrega.motorista.get_full_name|default:entrega.motorista.username }}{% endif %}.</p>
+  {% if comprovante.foto %}
+  <h3>Foto</h3>
+  <img class="comprovante-imagem" src="{% url 'entregas:foto_comprovante' entrega.pk %}" alt="Foto do comprovante da entrega para {{ entrega.cliente }}">
+  {% endif %}
+  {% if comprovante.assinatura %}
+  <h3>Assinatura</h3>
+  <img class="comprovante-imagem comprovante-assinatura" src="{{ comprovante.assinatura }}" alt="Assinatura do recebedor da entrega para {{ entrega.cliente }}">
+  {% endif %}
+</section>
+{% endblock %}

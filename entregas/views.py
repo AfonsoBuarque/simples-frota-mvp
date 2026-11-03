@@ -1,6 +1,9 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import connection, transaction
+from django.http import FileResponse, Http404, JsonResponse
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,6 +13,8 @@ from django.views.decorators.http import require_GET, require_POST
 from .forms import ComprovanteForm, EntregaForm, OcorrenciaForm
 from .models import Entrega, Usuario
 from .permissions import perfil_requerido
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -65,6 +70,7 @@ def registrar_ocorrencia(request, pk):
     form = OcorrenciaForm(request.POST) if request.method == "POST" else OcorrenciaForm()
     if form.is_bound and form.is_valid():
         entrega.registrar_ocorrencia(form.cleaned_data["motivo"], form.cleaned_data["detalhe"])
+        logger.info("ocorrencia_registrada entrega=%s motivo=%s", entrega.pk, entrega.motivo_ocorrencia)
         messages.success(
             request, f"Ocorrência registrada para {entrega.cliente}. O gerente já vê no painel."
         )
@@ -92,6 +98,7 @@ def registrar_comprovante(request, pk):
             comprovante.save()
             entrega.status = Entrega.Status.ENTREGUE
             entrega.save(update_fields=["status", "atualizada_em"])
+        logger.info("comprovante_registrado entrega=%s", entrega.pk)
         messages.success(request, f"Entrega para {entrega.cliente} concluída.")
         return redirect("entregas:minhas_entregas")
 
@@ -194,3 +201,53 @@ def acompanhar(request, token):
     )
     resposta["X-Robots-Tag"] = "noindex, nofollow"
     return resposta
+
+
+def _pode_ver_comprovante(usuario, entrega):
+    return usuario.eh_gerente or entrega.motorista_id == usuario.pk
+
+
+@login_required
+def ver_comprovante(request, pk):
+    """Comprovante visível só ao gerente e ao motorista da entrega (RNF02)."""
+    entrega = get_object_or_404(Entrega.objects.select_related("comprovante"), pk=pk)
+    comprovante = getattr(entrega, "comprovante", None)
+    if comprovante is None or not _pode_ver_comprovante(request.user, entrega):
+        raise Http404
+    return render(
+        request, "entregas/ver_comprovante.html", {"entrega": entrega, "comprovante": comprovante}
+    )
+
+
+@login_required
+def foto_comprovante(request, pk):
+    """Entrega o arquivo da foto sem expor a pasta de uploads."""
+    entrega = get_object_or_404(Entrega.objects.select_related("comprovante"), pk=pk)
+    comprovante = getattr(entrega, "comprovante", None)
+    if (
+        comprovante is None
+        or not comprovante.foto
+        or not _pode_ver_comprovante(request.user, entrega)
+    ):
+        raise Http404
+    try:
+        arquivo = comprovante.foto.open("rb")
+    except FileNotFoundError:
+        raise Http404
+    resposta = FileResponse(arquivo)
+    resposta["Cache-Control"] = "private, max-age=0, no-store"
+    return resposta
+
+
+@never_cache
+@require_GET
+def saude(request):
+    """Health check para o monitoramento: confirma aplicação e banco de dados."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+    except Exception:  # pragma: no cover - depende de falha real do banco
+        logger.exception("saude_falhou")
+        return JsonResponse({"status": "erro", "banco": "indisponivel"}, status=503)
+    return JsonResponse({"status": "ok", "banco": "ok"})
