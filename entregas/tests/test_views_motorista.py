@@ -46,7 +46,7 @@ class AcessoTests(BaseViewTest):
     def test_inicio_gerente(self):
         self.client.force_login(self.gerente)
         r = self.client.get(reverse("entregas:inicio"))
-        self.assertRedirects(r, reverse("admin:index"), fetch_redirect_response=False)
+        self.assertRedirects(r, reverse("entregas:painel"))
 
     def test_gerente_nao_acessa_tela_do_motorista(self):
         self.client.force_login(self.gerente)
