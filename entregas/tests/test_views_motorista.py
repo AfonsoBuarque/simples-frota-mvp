@@ -78,7 +78,7 @@ class MinhasEntregasTests(BaseViewTest):
         self.client.force_login(self.carlos)
         r = self.client.get(reverse("entregas:minhas_entregas"))
         self.assertContains(r, "Nenhuma entrega em aberto")
-        self.assertContains(r, "Concluídas recentemente")
+        self.assertContains(r, "Encerradas recentemente")
 
 
 class IniciarRotaTests(BaseViewTest):
@@ -180,10 +180,10 @@ class PopularDemoTests(TestCase):
         call_command("popular_demo")
         call_command("popular_demo")
         self.assertEqual(Usuario.objects.count(), 3)
-        self.assertEqual(Entrega.objects.count(), 6)
+        self.assertEqual(Entrega.objects.count(), 7)
         self.assertEqual(Comprovante.objects.count(), 1)
         call_command("popular_demo", "--reset")
-        self.assertEqual(Entrega.objects.count(), 6)
+        self.assertEqual(Entrega.objects.count(), 7)
 
     @override_settings(DEBUG=False)
     def test_bloqueado_sem_debug(self):
