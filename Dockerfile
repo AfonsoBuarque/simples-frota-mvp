@@ -23,4 +23,4 @@ USER appuser
 EXPOSE 8000
 
 # Aplica as migrações e sobe o Gunicorn na porta definida pela plataforma
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --timeout 60 --access-logfile - --error-logfile -"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && if [ \"$DEMO_SEED\" = \"True\" ]; then python manage.py popular_demo --producao; fi && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --timeout 60 --access-logfile - --error-logfile -"]
