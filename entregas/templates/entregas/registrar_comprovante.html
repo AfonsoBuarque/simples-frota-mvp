@@ -13,9 +13,13 @@
   {% endif %}
 
   <div class="campo">
-    <label for="{{ form.foto.id_for_label }}">Foto do comprovante</label>
+    <span class="rotulo" id="rotulo-foto">Foto do comprovante</span>
     <p class="ajuda" id="ajuda-foto">Tire uma foto do canhoto ou da entrega (até 5 MB).</p>
-    {{ form.foto }}
+    <div class="seletor-arquivo">
+      {{ form.foto }}
+      <label for="{{ form.foto.id_for_label }}" class="botao botao-secundario">Tirar ou escolher foto</label>
+      <span class="nome-arquivo" id="nome-foto" aria-live="polite">Nenhuma foto selecionada</span>
+    </div>
     {% for erro in form.foto.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
   </div>
 

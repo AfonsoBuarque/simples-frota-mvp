@@ -51,3 +51,15 @@
     temTraco = false;
   });
 })();
+
+// Mostra o nome da foto escolhida, já que o campo nativo fica oculto.
+(function () {
+  var entrada = document.getElementById("id_foto");
+  var nome = document.getElementById("nome-foto");
+  if (!entrada || !nome) return;
+  entrada.addEventListener("change", function () {
+    nome.textContent = entrada.files.length
+      ? "Foto selecionada: " + entrada.files[0].name
+      : "Nenhuma foto selecionada";
+  });
+})();
