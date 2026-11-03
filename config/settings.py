@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,11 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h]
 
+# Origens confiáveis para o CSRF (ex.: https://simples-frota.up.railway.app)
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o
+]
+
 
 # Application definition
 
@@ -47,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -78,8 +85,17 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# PostgreSQL quando DB_NAME estiver definido; SQLite como alternativa local.
-if os.environ.get("DB_NAME"):
+# Banco de dados, em ordem de prioridade:
+# 1. DATABASE_URL (Railway e outras nuvens)
+# 2. DB_NAME e demais variáveis (PostgreSQL local ou CI)
+# 3. SQLite, para desenvolvimento sem PostgreSQL
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(
+            os.environ["DATABASE_URL"], conn_max_age=600, conn_health_checks=True
+        )
+    }
+elif os.environ.get("DB_NAME"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -116,6 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 10},
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -129,9 +146,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "pt-br"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Sao_Paulo"
 
 USE_I18N = True
 
@@ -142,6 +159,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # Arquivos estáticos comprimidos (gzip/brotli) servidos pelo WhiteNoise
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -149,9 +173,45 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Em produção, aponte para um volume persistente (ex.: /app/media no Railway)
+MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media"))
 
 # Autenticação e redirecionamentos
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "entregas:inicio"
 LOGOUT_REDIRECT_URL = "login"
+
+# Sessão de 12 horas, o equivalente a um turno de trabalho (RNF01)
+SESSION_COOKIE_AGE = 12 * 60 * 60
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# Endurecimento para produção (atrás do proxy HTTPS da nuvem)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SSL_REDIRECT", "True") == "True"
+    # O health check interno da plataforma chega por HTTP
+    SECURE_REDIRECT_EXEMPT = [r"^saude/$"]
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "3600"))
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+
+# Logs em formato de linha única na saída padrão, lidos pelo painel da nuvem
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "linha": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "linha"},
+    },
+    "root": {"handlers": ["console"], "level": "INFO"},
+    "loggers": {
+        "django.request": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "entregas": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}
