@@ -32,11 +32,23 @@ Fora do escopo desta versão:
 
 ## Telas
 
-| Tela | Perfil | Função |
-|------|--------|--------|
-| Minhas entregas | Motorista | Lista as entregas atribuídas e permite atualizar o status |
-| Registrar entrega | Gerente | Cadastra e atribui uma nova entrega |
-| Painel do gerente | Gerente | Visão geral das entregas e dos atrasos |
+| Tela | Endereço | Perfil | Função |
+|------|----------|--------|--------|
+| Entrar | `/entrar/` | Todos | Login; cada perfil vai para a sua tela inicial |
+| Minhas entregas | `/entregas/` | Motorista | Lista as entregas atribuídas, inicia a rota e abre o comprovante |
+| Registrar comprovante | `/entregas/<id>/comprovante/` | Motorista | Foto ou assinatura na tela; conclui a entrega |
+| Painel do gerente | `/painel/` | Gerente | Indicadores, filtros por status e destaque para as atrasadas |
+| Nova entrega | `/painel/nova/` | Gerente | Cadastra e atribui uma entrega a um motorista |
+| Acompanhar entrega | `/acompanhar/<token>/` | Público | Status da entrega por link, sem login e sem dados internos |
+
+## Acessibilidade
+
+- Página em `pt-BR`, link "Pular para o conteúdo" e foco visível em todos os controles
+- Botões e áreas de toque com no mínimo 44 px (48 px nos botões principais)
+- Status sempre escrito por extenso, nunca indicado só por cor
+- Cores com contraste mínimo de 4,5:1 (WCAG 2.1 AA)
+- Rótulos em todos os campos, mensagens anunciadas por leitores de tela (`role="status"` e `role="alert"`)
+- Assinatura na tela opcional, com a foto do comprovante como alternativa
 
 ## Tecnologias
 
