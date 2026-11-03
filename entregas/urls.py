@@ -1,0 +1,16 @@
+from django.urls import path
+
+from . import views
+
+app_name = "entregas"
+
+urlpatterns = [
+    path("", views.inicio, name="inicio"),
+    path("entregas/", views.minhas_entregas, name="minhas_entregas"),
+    path("entregas/<int:pk>/iniciar/", views.iniciar_rota, name="iniciar_rota"),
+    path(
+        "entregas/<int:pk>/comprovante/",
+        views.registrar_comprovante,
+        name="registrar_comprovante",
+    ),
+]
