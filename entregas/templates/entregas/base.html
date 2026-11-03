@@ -1,0 +1,44 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Simples Frota{% endblock %} · Simples Frota</title>
+  <link rel="stylesheet" href="{% static 'entregas/css/app.css' %}">
+</head>
+<body>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo">
+    <div class="topo-interno">
+      <a class="marca" href="{% url 'entregas:inicio' %}">Simples Frota</a>
+      {% if user.is_authenticated %}
+      <nav class="topo-nav" aria-label="Principal">
+        {% block navegacao %}{% endblock %}
+        <span class="usuario">{{ user.get_full_name|default:user.username }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="botao botao-secundario">Sair</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main id="conteudo" class="conteudo" tabindex="-1">
+    {% if messages %}
+    <div class="mensagens" role="status" aria-live="polite">
+      {% for mensagem in messages %}
+      <p class="alerta alerta-{{ mensagem.tags }}">{{ mensagem }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <footer class="rodape">
+    <p>Simples Frota · Gestão simples de entregas e comprovantes</p>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

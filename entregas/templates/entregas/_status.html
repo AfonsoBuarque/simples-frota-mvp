@@ -1,0 +1,2 @@
+<span class="selo selo-{{ entrega.status }}">{{ entrega.get_status_display }}</span>
+{% if entrega.atrasada %}<span class="selo selo-atrasada">Atrasada</span>{% endif %}

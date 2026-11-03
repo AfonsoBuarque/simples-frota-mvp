@@ -1,0 +1,23 @@
+{% extends "entregas/base.html" %}
+{% block titulo %}Entrar{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao-estreito" aria-labelledby="titulo-login">
+  <h1 id="titulo-login">Entrar</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}
+    <p class="alerta alerta-error" role="alert">Usuário ou senha incorretos. Tente novamente.</p>
+    {% endif %}
+    <div class="campo">
+      <label for="{{ form.username.id_for_label }}">Usuário</label>
+      {{ form.username }}
+    </div>
+    <div class="campo">
+      <label for="{{ form.password.id_for_label }}">Senha</label>
+      {{ form.password }}
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="botao botao-primario botao-grande botao-bloco">Entrar</button>
+  </form>
+</section>
+{% endblock %}
