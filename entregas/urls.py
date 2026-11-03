@@ -14,5 +14,6 @@ urlpatterns = [
         name="registrar_comprovante",
     ),
     path("painel/", views.painel, name="painel"),
+    path("acompanhar/<uuid:token>/", views.acompanhar, name="acompanhar"),
     path("painel/nova/", views.nova_entrega, name="nova_entrega"),
 ]

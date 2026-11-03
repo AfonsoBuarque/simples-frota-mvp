@@ -4,7 +4,8 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import ComprovanteForm, EntregaForm
 from .models import Entrega, Usuario
@@ -129,3 +130,37 @@ def nova_entrega(request):
     else:
         form = EntregaForm()
     return render(request, "entregas/nova_entrega.html", {"form": form})
+
+
+ETAPAS_ACOMPANHAMENTO = [
+    (Entrega.Status.PENDENTE, "Pedido registrado"),
+    (Entrega.Status.EM_ROTA, "Saiu para entrega"),
+    (Entrega.Status.ENTREGUE, "Entregue"),
+]
+
+
+@never_cache
+@require_GET
+def acompanhar(request, token):
+    """Página pública: o cliente consulta o status pelo link, sem login.
+
+    Mostra só o necessário (cliente, status, prazo e horário do comprovante).
+    Endereço, observações e dados do motorista ficam de fora.
+    """
+    entrega = get_object_or_404(
+        Entrega.objects.select_related("comprovante"), token_consulta=token
+    )
+    ordem = [status for status, _ in ETAPAS_ACOMPANHAMENTO]
+    atual = ordem.index(entrega.status)
+    etapas = [
+        {"rotulo": rotulo, "concluida": i < atual, "atual": i == atual}
+        for i, (_, rotulo) in enumerate(ETAPAS_ACOMPANHAMENTO)
+    ]
+    comprovante = getattr(entrega, "comprovante", None)
+    resposta = render(
+        request,
+        "entregas/acompanhar.html",
+        {"entrega": entrega, "etapas": etapas, "comprovante": comprovante},
+    )
+    resposta["X-Robots-Tag"] = "noindex, nofollow"
+    return resposta
