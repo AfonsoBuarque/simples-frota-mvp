@@ -1,0 +1,50 @@
+{% extends "entregas/base.html" %}
+{% block titulo %}Minhas entregas{% endblock %}
+{% block conteudo %}
+<h1>Minhas entregas</h1>
+<p class="resumo">{{ abertas|length }} em aberto</p>
+
+{% if abertas %}
+<ul class="lista-cartoes">
+  {% for entrega in abertas %}
+  <li class="cartao{% if entrega.atrasada %} cartao-atrasado{% endif %}">
+    <div class="cartao-topo">
+      <h2>{{ entrega.cliente }}</h2>
+      <div class="selos">{% include "entregas/_status.html" %}</div>
+    </div>
+    <p class="endereco">{{ entrega.endereco }}</p>
+    {% if entrega.prazo %}
+    <p>Prazo: <time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m/Y H:i" }}</time></p>
+    {% endif %}
+    {% if entrega.observacoes %}<p>Observações: {{ entrega.observacoes }}</p>{% endif %}
+
+    {% if entrega.status == "pendente" %}
+    <form method="post" action="{% url 'entregas:iniciar_rota' entrega.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="botao botao-primario botao-grande botao-bloco"
+              aria-label="Iniciar rota para {{ entrega.cliente }}">Iniciar rota</button>
+    </form>
+    {% else %}
+    <a class="botao botao-primario botao-grande botao-bloco"
+       href="{% url 'entregas:registrar_comprovante' entrega.pk %}"
+       aria-label="Registrar comprovante de {{ entrega.cliente }}">Registrar comprovante</a>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="vazio">Nenhuma entrega em aberto. Bom trabalho!</p>
+{% endif %}
+
+{% if concluidas %}
+<h2 class="subtitulo">Concluídas recentemente</h2>
+<ul class="lista-simples">
+  {% for entrega in concluidas %}
+  <li>
+    <span>{{ entrega.cliente }}</span>
+    <span class="selo selo-entregue">Entregue</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

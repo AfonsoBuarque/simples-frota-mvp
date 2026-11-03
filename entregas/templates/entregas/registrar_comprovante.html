@@ -1,0 +1,35 @@
+{% extends "entregas/base.html" %}
+{% load static %}
+{% block titulo %}Registrar comprovante{% endblock %}
+{% block conteudo %}
+<p><a class="link-voltar" href="{% url 'entregas:minhas_entregas' %}">← Voltar para minhas entregas</a></p>
+<h1>Registrar comprovante</h1>
+<p class="resumo">{{ entrega.cliente }} · {{ entrega.endereco }}</p>
+
+<form method="post" enctype="multipart/form-data" class="cartao" id="form-comprovante" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <p class="alerta alerta-error" role="alert">{{ form.non_field_errors.0 }}</p>
+  {% endif %}
+
+  <div class="campo">
+    <label for="{{ form.foto.id_for_label }}">Foto do comprovante</label>
+    <p class="ajuda" id="ajuda-foto">Tire uma foto do canhoto ou da entrega (até 5 MB).</p>
+    {{ form.foto }}
+    {% for erro in form.foto.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
+  </div>
+
+  <div class="campo">
+    <span class="rotulo" id="rotulo-assinatura">Assinatura na tela</span>
+    <p class="ajuda" id="ajuda-assinatura">Peça para o cliente assinar com o dedo. Se preferir, envie só a foto acima.</p>
+    <canvas id="area-assinatura" class="assinatura" width="600" height="240"
+            role="img" aria-labelledby="rotulo-assinatura" aria-describedby="ajuda-assinatura"></canvas>
+    {{ form.assinatura }}
+    {% for erro in form.assinatura.errors %}<p class="erro-campo" role="alert">{{ erro }}</p>{% endfor %}
+    <button type="button" class="botao botao-secundario" id="limpar-assinatura">Limpar assinatura</button>
+  </div>
+
+  <button type="submit" class="botao botao-primario botao-grande botao-bloco">Concluir entrega</button>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{% static 'entregas/js/assinatura.js' %}"></script>{% endblock %}
