@@ -6,9 +6,22 @@
   {% block meta %}{% endblock %}
   <title>{% block titulo %}Simples Frota{% endblock %} · Simples Frota</title>
   <link rel="stylesheet" href="{% static 'entregas/css/app.css' %}">
+  <script src="{% static 'entregas/js/acessibilidade.js' %}"></script>
 </head>
 <body>
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <div class="barra-acessibilidade" role="region" aria-label="Opções de acessibilidade">
+    <div class="barra-interna">
+      <span class="barra-titulo" id="titulo-acessibilidade">Acessibilidade</span>
+      <div class="barra-grupo" role="group" aria-labelledby="titulo-acessibilidade">
+        <button type="button" class="botao-acess" data-acao="diminuir-fonte" aria-label="Diminuir tamanho do texto">A−</button>
+        <button type="button" class="botao-acess" data-acao="aumentar-fonte" aria-label="Aumentar tamanho do texto">A+</button>
+        <button type="button" class="botao-acess" data-acao="alto-contraste" aria-pressed="false">Alto contraste</button>
+      </div>
+      <span class="visualmente-oculto" id="aviso-acessibilidade" aria-live="polite"></span>
+    </div>
+  </div>
 
   <header class="topo">
     <div class="topo-interno">
