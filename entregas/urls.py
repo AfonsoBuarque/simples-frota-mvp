@@ -13,4 +13,6 @@ urlpatterns = [
         views.registrar_comprovante,
         name="registrar_comprovante",
     ),
+    path("painel/", views.painel, name="painel"),
+    path("painel/nova/", views.nova_entrega, name="nova_entrega"),
 ]
