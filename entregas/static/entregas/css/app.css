@@ -192,3 +192,13 @@ textarea { min-height: 6rem; }
   .tabela th, .tabela td { border: 0; padding: .35rem .75rem; }
   .tabela td::before { content: attr(data-rotulo) ": "; font-weight: 700; }
 }
+
+/* Acompanhamento público */
+.link-acompanhar { display: inline-block; margin-top: .25rem; font-size: .9rem; font-weight: 400; padding: .25rem 0; }
+.status-atual { font-size: 1.1rem; }
+.etapas { list-style: none; margin: 1.25rem 0; padding: 0; }
+.etapa { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; color: var(--texto-suave); }
+.etapa-marcador { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 2px solid var(--texto-suave); font-weight: 800; flex-shrink: 0; }
+.etapa-concluida, .etapa-atual { color: var(--texto); font-weight: 700; }
+.etapa-concluida .etapa-marcador { background: #0b4f1c; border-color: #0b4f1c; color: #fff; }
+.etapa-atual .etapa-marcador { background: var(--primaria); border-color: var(--primaria); color: #fff; }
