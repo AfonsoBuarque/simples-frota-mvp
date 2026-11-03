@@ -86,7 +86,14 @@ Testes unitários e de integração, com análise de cobertura, serão adicionad
 
 ## Integração Contínua
 
-Um pipeline no GitHub Actions executará o build e os testes a cada push e Pull Request.
+[![CI](https://github.com/AfonsoBuarque/simples-frota-mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/AfonsoBuarque/simples-frota-mvp/actions/workflows/ci.yml)
+
+O pipeline do GitHub Actions (`.github/workflows/ci.yml`) roda a cada push na `main` e a cada Pull Request, com Python 3.12 e PostgreSQL 16:
+
+1. Instala as dependências
+2. Verifica o projeto (`manage.py check`) e se há migrações pendentes
+3. Executa os testes com cobertura
+4. Falha se a cobertura ficar abaixo de 90%
 
 ## Fluxo de trabalho
 
