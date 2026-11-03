@@ -48,12 +48,17 @@ class Command(BaseCommand):
                 ("Loja Casa Nova", "Rua Verde, 18 - Jardim Alegre", marina, Entrega.Status.PENDENTE, agora + timedelta(hours=5), ""),
                 ("Restaurante Sabor Caseiro", "Av. das Palmeiras, 900", marina, Entrega.Status.EM_ROTA, agora - timedelta(minutes=30), "Tocar a campainha dos fundos."),
                 ("Escola Pequeno Passo", "Rua da Escola, 7", carlos, Entrega.Status.ENTREGUE, agora - timedelta(hours=4), ""),
+                ("Casa de Ração Pet", "Rua das Acácias, 52", marina, Entrega.Status.EM_ROTA, agora - timedelta(hours=1), ""),
             ]
             for cliente, endereco, motorista, status, prazo, obs in dados:
                 entrega = Entrega.objects.create(
                     cliente=cliente, endereco=endereco, motorista=motorista,
                     status=status, prazo=prazo, observacoes=obs,
                 )
+                if cliente == "Casa de Ração Pet":
+                    entrega.registrar_ocorrencia(
+                        Entrega.MotivoOcorrencia.CLIENTE_AUSENTE, "Loja fechada às 10h."
+                    )
                 if status == Entrega.Status.ENTREGUE:
                     Comprovante.objects.create(
                         entrega=entrega, assinatura=f"data:image/png;base64,{PNG_1X1}"
