@@ -90,3 +90,33 @@ class EntregaForm(forms.ModelForm):
         for nome, campo in self.fields.items():
             if campo.help_text:
                 campo.widget.attrs["aria-describedby"] = f"id_{nome}_ajuda"
+
+
+class OcorrenciaForm(forms.Form):
+    """Registro de entrega não realizada, com motivo obrigatório."""
+
+    motivo = forms.ChoiceField(
+        label="Por que não foi possível entregar?",
+        choices=Entrega.MotivoOcorrencia.choices,
+        widget=forms.RadioSelect,
+        error_messages={"required": "Escolha o motivo da ocorrência."},
+    )
+    detalhe = forms.CharField(
+        label="Detalhes",
+        required=False,
+        max_length=300,
+        help_text="Obrigatório se o motivo for \"Outro motivo\". Até 300 caracteres.",
+        widget=forms.Textarea(attrs={"rows": 3, "aria-describedby": "id_detalhe_ajuda"}),
+    )
+
+    def clean_detalhe(self):
+        detalhe = self.cleaned_data.get("detalhe", "").strip()
+        if "<" in detalhe or ">" in detalhe:
+            raise forms.ValidationError("Use apenas texto, sem os sinais < e >.")
+        return detalhe
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get("motivo") == Entrega.MotivoOcorrencia.OUTRO and not dados.get("detalhe"):
+            self.add_error("detalhe", "Descreva o motivo da ocorrência.")
+        return dados

@@ -13,6 +13,11 @@ urlpatterns = [
         views.registrar_comprovante,
         name="registrar_comprovante",
     ),
+    path(
+        "entregas/<int:pk>/ocorrencia/",
+        views.registrar_ocorrencia,
+        name="registrar_ocorrencia",
+    ),
     path("painel/", views.painel, name="painel"),
     path("acompanhar/<uuid:token>/", views.acompanhar, name="acompanhar"),
     path("painel/nova/", views.nova_entrega, name="nova_entrega"),

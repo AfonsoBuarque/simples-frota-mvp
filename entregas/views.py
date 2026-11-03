@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
-from .forms import ComprovanteForm, EntregaForm
+from .forms import ComprovanteForm, EntregaForm, OcorrenciaForm
 from .models import Entrega, Usuario
 from .permissions import perfil_requerido
 
@@ -23,8 +23,10 @@ def inicio(request):
 @perfil_requerido(Usuario.Perfil.MOTORISTA)
 def minhas_entregas(request):
     entregas = request.user.entregas.select_related("comprovante")
-    abertas = entregas.exclude(status=Entrega.Status.ENTREGUE).order_by("prazo", "criada_em")
-    concluidas = entregas.filter(status=Entrega.Status.ENTREGUE).order_by(
+    abertas = entregas.filter(status__in=Entrega.STATUS_ABERTOS).order_by(
+        "prazo", "criada_em"
+    )
+    concluidas = entregas.exclude(status__in=Entrega.STATUS_ABERTOS).order_by(
         "-atualizada_em"
     )[:5]
     return render(
@@ -45,16 +47,39 @@ def iniciar_rota(request, pk):
     return redirect("entregas:minhas_entregas")
 
 
+def _entrega_fora_de_rota(request, entrega):
+    """Comprovante e ocorrência só valem para entregas em rota."""
+    if entrega.status == Entrega.Status.PENDENTE:
+        messages.error(request, "Inicie a rota antes de registrar o resultado da entrega.")
+    else:
+        messages.info(request, "Esta entrega já foi encerrada.")
+    return redirect("entregas:minhas_entregas")
+
+
+@perfil_requerido(Usuario.Perfil.MOTORISTA)
+def registrar_ocorrencia(request, pk):
+    entrega = get_object_or_404(Entrega, pk=pk, motorista=request.user)
+    if entrega.status != Entrega.Status.EM_ROTA:
+        return _entrega_fora_de_rota(request, entrega)
+
+    form = OcorrenciaForm(request.POST) if request.method == "POST" else OcorrenciaForm()
+    if form.is_bound and form.is_valid():
+        entrega.registrar_ocorrencia(form.cleaned_data["motivo"], form.cleaned_data["detalhe"])
+        messages.success(
+            request, f"Ocorrência registrada para {entrega.cliente}. O gerente já vê no painel."
+        )
+        return redirect("entregas:minhas_entregas")
+    return render(
+        request, "entregas/registrar_ocorrencia.html", {"entrega": entrega, "form": form}
+    )
+
+
 @perfil_requerido(Usuario.Perfil.MOTORISTA)
 def registrar_comprovante(request, pk):
     entrega = get_object_or_404(Entrega, pk=pk, motorista=request.user)
 
-    if entrega.status == Entrega.Status.ENTREGUE:
-        messages.info(request, "Esta entrega já foi concluída.")
-        return redirect("entregas:minhas_entregas")
-    if entrega.status == Entrega.Status.PENDENTE:
-        messages.error(request, "Inicie a rota antes de registrar o comprovante.")
-        return redirect("entregas:minhas_entregas")
+    if entrega.status != Entrega.Status.EM_ROTA:
+        return _entrega_fora_de_rota(request, entrega)
 
     if request.method == "POST":
         form = ComprovanteForm(request.POST, request.FILES)
@@ -81,13 +106,14 @@ FILTROS_PAINEL = {
     Entrega.Status.PENDENTE: "Pendentes",
     Entrega.Status.EM_ROTA: "Em rota",
     Entrega.Status.ENTREGUE: "Entregues",
+    Entrega.Status.OCORRENCIA: "Ocorrências",
 }
 
 
 @perfil_requerido(Usuario.Perfil.GERENTE)
 def painel(request):
     agora = timezone.now()
-    filtro_atraso = Q(prazo__lt=agora) & ~Q(status=Entrega.Status.ENTREGUE)
+    filtro_atraso = Q(prazo__lt=agora) & Q(status__in=Entrega.STATUS_ABERTOS)
     todas = Entrega.objects.select_related("motorista", "comprovante")
 
     contagem = todas.aggregate(
@@ -95,6 +121,7 @@ def painel(request):
         pendentes=Count("id", filter=Q(status=Entrega.Status.PENDENTE)),
         em_rota=Count("id", filter=Q(status=Entrega.Status.EM_ROTA)),
         entregues=Count("id", filter=Q(status=Entrega.Status.ENTREGUE)),
+        ocorrencias=Count("id", filter=Q(status=Entrega.Status.OCORRENCIA)),
         atrasadas=Count("id", filter=filtro_atraso),
     )
 
@@ -151,11 +178,14 @@ def acompanhar(request, token):
         Entrega.objects.select_related("comprovante"), token_consulta=token
     )
     ordem = [status for status, _ in ETAPAS_ACOMPANHAMENTO]
-    atual = ordem.index(entrega.status)
+    # Ocorrência interrompe o fluxo depois de "Saiu para entrega".
+    atual = ordem.index(entrega.status) if entrega.status in ordem else 2
     etapas = [
         {"rotulo": rotulo, "concluida": i < atual, "atual": i == atual}
         for i, (_, rotulo) in enumerate(ETAPAS_ACOMPANHAMENTO)
     ]
+    if entrega.status == Entrega.Status.OCORRENCIA:
+        etapas = etapas[:2]
     comprovante = getattr(entrega, "comprovante", None)
     resposta = render(
         request,
