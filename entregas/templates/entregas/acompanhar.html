@@ -8,6 +8,9 @@
 
   <p class="status-atual">Status atual: <strong>{{ entrega.get_status_display }}</strong></p>
 
+  {% if entrega.status == "ocorrencia" %}
+  <p class="alerta alerta-error">Não foi possível concluir a entrega nesta tentativa. A Simples Frota vai entrar em contato para combinar uma nova entrega.</p>
+  {% endif %}
   {% if entrega.atrasada %}
   <p class="alerta alerta-error">Esta entrega passou do prazo previsto. A Simples Frota já foi avisada pelo painel.</p>
   {% endif %}
@@ -21,7 +24,7 @@
     {% endfor %}
   </ol>
 
-  {% if entrega.prazo and entrega.status != "entregue" %}
+  {% if entrega.prazo and entrega.status != "entregue" and entrega.status != "ocorrencia" %}
   <p>Previsão: <time datetime="{{ entrega.prazo|date:'c' }}">{{ entrega.prazo|date:"d/m/Y \à\s H:i" }}</time></p>
   {% endif %}
   {% if comprovante %}

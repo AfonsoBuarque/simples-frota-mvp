@@ -1,2 +1,2 @@
-<span class="selo selo-{{ entrega.status }}">{{ entrega.get_status_display }}</span>
-{% if entrega.atrasada %}<span class="selo selo-atrasada">Atrasada</span>{% endif %}
+<span class="selo selo-{{ entrega.status }}"><span class="selo-icone" aria-hidden="true">{% if entrega.status == "pendente" %}○{% elif entrega.status == "em_rota" %}➜{% elif entrega.status == "entregue" %}✓{% else %}!{% endif %}</span> {{ entrega.get_status_display }}</span>
+{% if entrega.atrasada %}<span class="selo selo-atrasada"><span class="selo-icone" aria-hidden="true">⚠</span> Atrasada</span>{% endif %}

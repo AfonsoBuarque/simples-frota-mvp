@@ -28,6 +28,9 @@
     <a class="botao botao-primario botao-grande botao-bloco"
        href="{% url 'entregas:registrar_comprovante' entrega.pk %}"
        aria-label="Registrar comprovante de {{ entrega.cliente }}">Registrar comprovante</a>
+    <a class="botao botao-secundario botao-bloco"
+       href="{% url 'entregas:registrar_ocorrencia' entrega.pk %}"
+       aria-label="Não consegui entregar para {{ entrega.cliente }}">Não consegui entregar</a>
     {% endif %}
   </li>
   {% endfor %}
@@ -37,12 +40,12 @@
 {% endif %}
 
 {% if concluidas %}
-<h2 class="subtitulo">Concluídas recentemente</h2>
+<h2 class="subtitulo">Encerradas recentemente</h2>
 <ul class="lista-simples">
   {% for entrega in concluidas %}
   <li>
     <span>{{ entrega.cliente }}</span>
-    <span class="selo selo-entregue">Entregue</span>
+    <span class="selos">{% include "entregas/_status.html" %}</span>
   </li>
   {% endfor %}
 </ul>

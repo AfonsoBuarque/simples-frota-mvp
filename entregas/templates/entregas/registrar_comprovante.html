@@ -35,5 +35,7 @@
 
   <button type="submit" class="botao botao-primario botao-grande botao-bloco">Concluir entrega</button>
 </form>
+<p class="acao-alternativa">Cliente ausente ou endereço errado?
+  <a href="{% url 'entregas:registrar_ocorrencia' entrega.pk %}">Não consegui entregar</a></p>
 {% endblock %}
 {% block scripts %}<script src="{% static 'entregas/js/assinatura.js' %}"></script>{% endblock %}
